@@ -2,12 +2,37 @@
 
 A modern web-based management interface for Samba Active Directory, built with FastAPI and Vue 3.
 
+## ✨ Features
+
+### 🧙 Setup Wizard
+Complete **8-step guided wizard** for provisioning a new Samba AD Domain Controller:
+- **Prerequisites checking** - Validates system requirements
+- **Domain configuration** - Easy setup with auto-fill
+- **DNS configuration** - Multiple backend options
+- **Review & provision** - Safe deployment with confirmation
+- **🔬 Comprehensive verification tests** - Automated testing suite with 15+ tests covering DNS, LDAP, Kerberos, services, and authentication
+
+**See [SETUP_WIZARD.md](SETUP_WIZARD.md) for complete documentation.**
+
+### 📊 Verification Tests
+The wizard includes a comprehensive test suite that verifies:
+- ✅ DNS resolution and SRV records
+- ✅ Service ports (LDAP, Kerberos, SMB, DNS)
+- ✅ LDAP connectivity and queries
+- ✅ Kerberos ticket acquisition
+- ✅ Administrator authentication
+- ✅ System prerequisites
+
+All tests run automatically after provisioning with detailed results, error messages, and troubleshooting tips.
+
 ## 🚀 Quick Start
 
 ### Prerequisites
 
 - Docker & Docker Compose
 - Git
+- **Note**: The backend container runs with elevated privileges for Samba operations (this is safe in containerized environments)
+- **Windows Users**: See [WINDOWS_SETUP.md](WINDOWS_SETUP.md) for port conflict information (TL;DR: default config works fine, Samba ports not exposed to avoid Windows conflicts)
 
 ### Running the Application
 
@@ -176,9 +201,13 @@ VITE_API_URL=http://localhost:8000
   - Database: `adhub`
 
 ### Backend Service
-- **Port**: 8000
+- **Port**: 8000 (API exposed to host)
+- **Samba Ports**: Available inside container and Docker network (NOT exposed to host by default to avoid Windows conflicts)
+- **Container IP**: 172.20.0.10 (access Samba services via this IP from other containers)
 - **Hot Reload**: Enabled (volume mounted)
 - **Health Check**: Every 30s
+- **Includes**: Full Samba AD DC installation
+- **Privileges**: Runs with elevated privileges (required for Samba)
 
 ### Frontend Service
 - **Port**: 5173
@@ -290,7 +319,39 @@ Now that your stack is working, you can start building features:
 5. **DNS Management**: Manage DNS records
 6. **Group Policy**: GPO management interface
 
-Refer to `CLAUDE.md` and `TECHNICAL_SPEC.md` for detailed planning and architecture.
+Refer to `CLAUDE.md`, `TECHNICAL_SPEC.md`, and `SETUP_WIZARD.md` for detailed planning and architecture.
+
+## 🐳 Docker Configuration
+
+The backend container includes:
+- **Full Samba installation** (samba, samba-tool, etc.)
+- **Verification tools** (ldap-utils, krb5-user, smbclient, dnsutils)
+- **Privileged mode** (required for Samba AD DC operations)
+- **Persistent volumes** for Samba data
+- **Static IP address** for DNS stability
+
+**See [DOCKER_SETUP.md](DOCKER_SETUP.md) for complete Docker configuration documentation.**
+
+### Installed in Backend Container
+
+```bash
+# Samba components
+samba, samba-common-bin, samba-dsdb-modules, winbind
+
+# Verification utilities
+ldap-utils, krb5-user, smbclient, dnsutils, host
+
+# Network tools
+net-tools, iputils-ping, procps
+```
+
+### Security Note
+
+The backend container runs with **privileged mode** and elevated capabilities. This is:
+- ✅ **Required** for Samba AD DC operations (port binding, file permissions)
+- ✅ **Safe** in containerized environments (process and filesystem isolation)
+- ✅ **Standard** for Samba DC containers
+- ⚠️ **Only expose** necessary ports to trusted networks
 
 ## 📄 License
 

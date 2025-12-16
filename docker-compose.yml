@@ -25,14 +25,67 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: adhub-backend
+    hostname: adhub-dc
+    # Run with elevated privileges for Samba operations
+    # This is safe in containerized environments
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+      - SYS_ADMIN
+      - DAC_OVERRIDE
+      - DAC_READ_SEARCH
+      - CHOWN
+      - FOWNER
+      - SETUID
+      - SETGID
     environment:
       DATABASE_URL: postgresql://adhub:adhub_password@db:5432/adhub
       ENVIRONMENT: development
       DEBUG: "true"
+      # Prevent Kerberos interactive prompts
+      KRB5_CONFIG: /dev/null
     volumes:
+      # Application code (hot reload)
       - ./backend:/app
+      # Persist Samba data
+      - samba_lib:/var/lib/samba
+      - samba_log:/var/log/samba
+      - samba_cache:/var/cache/samba
+      - samba_config:/etc/samba
+      - adhub_logs:/var/log/adhub
     ports:
+      # FastAPI - Web UI access
       - "8000:8000"
+
+      # NOTE: Samba ports are NOT exposed to host by default to avoid conflicts
+      # with Windows services (ports 135, 139, 445 are used by Windows).
+      #
+      # Samba services ARE available:
+      # - Inside the container (localhost)
+      # - To other containers via Docker network (172.20.0.10)
+      # - This is sufficient for the setup wizard and verification tests
+      #
+      # If you need to join Windows clients from the HOST machine to this domain,
+      # uncomment and modify the ports below to use different host ports:
+      #
+      # Example: Map container port 389 (LDAP) to host port 10389
+      # - "10389:389"    # LDAP (access via localhost:10389)
+      # - "10636:636"    # LDAPS
+      # - "10445:445"    # SMB
+      # - "10088:88"     # Kerberos
+      # - "10053:53"     # DNS
+      # - "10053:53/udp" # DNS (UDP)
+
+      # Uncomment these ONLY if you need external client access AND change to free ports:
+      # - "10053:53"       # DNS
+      # - "10053:53/udp"   # DNS (UDP)
+      # - "10088:88"       # Kerberos
+      # - "10088:88/udp"   # Kerberos (UDP)
+      # - "10389:389"      # LDAP
+      # - "10445:445"      # SMB
+      # - "10636:636"      # LDAPS
+      # - "13268:3268"     # Global Catalog
+      # - "13269:3269"     # Global Catalog SSL
     depends_on:
       db:
         condition: service_healthy
@@ -43,7 +96,9 @@ services:
       retries: 3
       start_period: 40s
     networks:
-      - adhub-network
+      adhub-network:
+        # Assign static IP for DNS stability
+        ipv4_address: 172.20.0.10
 
   frontend:
     build:
@@ -64,7 +119,16 @@ services:
 
 volumes:
   postgres_data:
+  # Samba data volumes (persist domain data)
+  samba_lib:
+  samba_log:
+  samba_cache:
+  samba_config:
+  adhub_logs:
 
 networks:
   adhub-network:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
