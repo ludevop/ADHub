@@ -24,7 +24,8 @@ const isValid = computed(() => {
 function autofillFromDomain() {
   if (config.domain_name) {
     config.realm = config.domain_name.toUpperCase()
-    config.domain = config.domain_name.split('.')[0].toUpperCase()
+    const parts = config.domain_name.split('.')
+    config.domain = (parts[0] || config.domain_name).toUpperCase()
   }
 }
 </script>

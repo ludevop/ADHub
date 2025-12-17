@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useSetupStore } from '@/stores/setup'
 import type { VerificationTest } from '@/types/setup'
+import { DNSBackendType } from '@/types/setup'
 import { setupApi } from '@/api/setup'
 
 const setupStore = useSetupStore()
@@ -19,7 +20,10 @@ const testsByCategory = computed(() => {
     if (!categories[test.category]) {
       categories[test.category] = []
     }
-    categories[test.category].push(test)
+    const category = categories[test.category]
+    if (category) {
+      category.push(test)
+    }
   })
 
   return categories
@@ -88,7 +92,7 @@ async function checkAndPrepareConfig() {
         }
 
         // Set other required fields for tests
-        setupStore.domainConfig.dns_backend = 'SAMBA_INTERNAL'
+        setupStore.domainConfig.dns_backend = DNSBackendType.SAMBA_INTERNAL
         setupStore.domainConfig.server_role = 'dc'
       } else {
         console.log('Config already populated, skipping fetch')
