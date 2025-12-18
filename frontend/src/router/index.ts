@@ -5,6 +5,7 @@ import SetupWizard from '@/views/SetupWizard.vue'
 import Login from '@/views/Login.vue'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import DashboardHome from '@/views/dashboard/Home.vue'
+import DashboardUsers from '@/views/dashboard/Users.vue'
 import { useAuthStore } from '@/stores/auth'
 
 const router = createRouter({
@@ -39,6 +40,12 @@ const router = createRouter({
           path: '',
           name: 'dashboard',
           component: DashboardHome
+        },
+        {
+          path: 'users',
+          name: 'users',
+          component: DashboardUsers,
+          meta: { title: 'User Management' }
         }
       ]
     }

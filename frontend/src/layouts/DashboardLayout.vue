@@ -42,7 +42,7 @@ function closeUserMenu() {
 // Navigation items
 const navItems = [
   { name: 'Dashboard', icon: '📊', path: '/dashboard' },
-  { name: 'Users', icon: '👥', path: '/dashboard/users', disabled: true },
+  { name: 'Users', icon: '👥', path: '/dashboard/users', disabled: false },
   { name: 'Groups', icon: '👨‍👩‍👧‍👦', path: '/dashboard/groups', disabled: true },
   { name: 'Shares', icon: '📁', path: '/dashboard/shares', disabled: true },
   { name: 'DNS', icon: '🌐', path: '/dashboard/dns', disabled: true },
