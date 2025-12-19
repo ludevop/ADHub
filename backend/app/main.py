@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 import logging
 
 from app.config import settings
-from app.api.v1 import health, setup, auth, stats, users, groups
+from app.api.v1 import health, setup, auth, stats, users, groups, shares, dns
 
 # Configure logging
 logging.basicConfig(
@@ -48,6 +48,8 @@ app.include_router(auth.router, prefix="/api/v1", tags=["auth"])
 app.include_router(stats.router, prefix="/api/v1", tags=["stats"])
 app.include_router(users.router, prefix="/api/v1", tags=["users"])
 app.include_router(groups.router, prefix="/api/v1", tags=["groups"])
+app.include_router(shares.router, prefix="/api/v1", tags=["shares"])
+app.include_router(dns.router, prefix="/api/v1", tags=["dns"])
 
 
 @app.get("/")

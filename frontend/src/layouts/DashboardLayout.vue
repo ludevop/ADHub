@@ -44,8 +44,8 @@ const navItems = [
   { name: 'Dashboard', icon: '📊', path: '/dashboard' },
   { name: 'Users', icon: '👥', path: '/dashboard/users', disabled: false },
   { name: 'Groups', icon: '👨‍👩‍👧‍👦', path: '/dashboard/groups', disabled: false },
-  { name: 'Shares', icon: '📁', path: '/dashboard/shares', disabled: true },
-  { name: 'DNS', icon: '🌐', path: '/dashboard/dns', disabled: true },
+  { name: 'Shares', icon: '📁', path: '/dashboard/shares', disabled: false },
+  { name: 'DNS', icon: '🌐', path: '/dashboard/dns', disabled: false },
   { name: 'Group Policy', icon: '📋', path: '/dashboard/gpo', disabled: true },
   { name: 'Settings', icon: '⚙️', path: '/dashboard/settings', disabled: true }
 ]

@@ -7,6 +7,8 @@ import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import DashboardHome from '@/views/dashboard/Home.vue'
 import DashboardUsers from '@/views/dashboard/Users.vue'
 import DashboardGroups from '@/views/dashboard/Groups.vue'
+import DashboardShares from '@/views/dashboard/Shares.vue'
+import DashboardDNS from '@/views/dashboard/DNS.vue'
 import { useAuthStore } from '@/stores/auth'
 
 const router = createRouter({
@@ -53,6 +55,18 @@ const router = createRouter({
           name: 'groups',
           component: DashboardGroups,
           meta: { title: 'Group Management' }
+        },
+        {
+          path: 'shares',
+          name: 'shares',
+          component: DashboardShares,
+          meta: { title: 'Share Management' }
+        },
+        {
+          path: 'dns',
+          name: 'dns',
+          component: DashboardDNS,
+          meta: { title: 'DNS Management' }
         }
       ]
     }
