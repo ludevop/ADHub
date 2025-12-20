@@ -6,7 +6,10 @@ from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
 from jose import JWTError, jwt
 from passlib.context import CryptContext
+from cryptography.fernet import Fernet
 import os
+import base64
+import hashlib
 
 # JWT Configuration
 SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-this-in-production-use-openssl-rand-hex-32")
@@ -84,3 +87,45 @@ def get_password_hash(password: str) -> str:
         Hashed password string
     """
     return pwd_context.hash(password)
+
+
+def get_encryption_key() -> bytes:
+    """
+    Get or generate encryption key from SECRET_KEY
+    Fernet requires a 32 byte base64-encoded key
+    """
+    # Derive a key from SECRET_KEY
+    key = hashlib.sha256(SECRET_KEY.encode()).digest()
+    return base64.urlsafe_b64encode(key)
+
+
+def encrypt_password(password: str) -> str:
+    """
+    Encrypt a password for storage in JWT
+
+    Args:
+        password: Plain text password
+
+    Returns:
+        Encrypted password as base64 string
+    """
+    key = get_encryption_key()
+    fernet = Fernet(key)
+    encrypted = fernet.encrypt(password.encode())
+    return encrypted.decode()
+
+
+def decrypt_password(encrypted_password: str) -> str:
+    """
+    Decrypt a password from JWT
+
+    Args:
+        encrypted_password: Encrypted password as base64 string
+
+    Returns:
+        Decrypted plain text password
+    """
+    key = get_encryption_key()
+    fernet = Fernet(key)
+    decrypted = fernet.decrypt(encrypted_password.encode())
+    return decrypted.decode()

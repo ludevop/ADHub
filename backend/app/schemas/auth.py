@@ -26,6 +26,7 @@ class TokenData(BaseModel):
     username: str
     domain: Optional[str] = None
     groups: List[str] = []
+    encrypted_password: Optional[str] = None  # Encrypted user password for AD operations
     exp: Optional[datetime] = None
 
 
@@ -37,6 +38,7 @@ class User(BaseModel):
     domain: str
     groups: List[str] = []
     is_admin: bool = False
+    password: Optional[str] = None  # Decrypted password for AD operations
 
 
 class SetupCompletionStatus(BaseModel):

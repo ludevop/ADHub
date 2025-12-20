@@ -51,7 +51,7 @@ async def list_records(
     Requires admin privileges.
     """
     try:
-        records = dns_service.list_records(zone)
+        records = dns_service.list_records(zone, password=current_user.password)
         return DNSRecordListResponse(
             records=records,
             total=len(records),
@@ -83,7 +83,7 @@ async def add_record(
             name=record_data.name,
             record_type=record_data.type,
             data=record_data.data,
-            admin_password=record_data.admin_password
+            password=current_user.password
         )
 
         if not success:
@@ -142,7 +142,7 @@ async def delete_record(
             name=record_data.name,
             record_type=record_data.type,
             data=record_data.data,
-            admin_password=record_data.admin_password
+            password=current_user.password
         )
 
         return None

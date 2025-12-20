@@ -228,7 +228,7 @@ class SambaGroupService:
         self,
         groupname: str,
         description: Optional[str] = None,
-        admin_password: str = None
+        password: str = None
     ) -> bool:
         """
         Update group attributes using LDAP
@@ -236,7 +236,7 @@ class SambaGroupService:
         Args:
             groupname: Group name to update
             description: New description
-            admin_password: Administrator password for authentication
+            password: User's password for authentication
 
         Returns:
             True if successful
@@ -279,8 +279,8 @@ class SambaGroupService:
             # Connect to LDAP
             server = Server('ldap://localhost')
 
-            if not admin_password:
-                raise Exception("Admin password is required to update group attributes")
+            if not password:
+                raise Exception("Password is required to update group attributes")
 
             admin_user = f"{netbios_domain}\\Administrator" if netbios_domain else "Administrator"
 
@@ -288,7 +288,7 @@ class SambaGroupService:
                 conn = Connection(
                     server,
                     user=admin_user,
-                    password=admin_password,
+                    password=password,
                     authentication=SIMPLE,
                     auto_bind=True,
                     raise_exceptions=True

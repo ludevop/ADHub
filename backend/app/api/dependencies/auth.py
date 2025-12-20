@@ -8,7 +8,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from typing import Optional
 
-from app.core.security import verify_token
+from app.core.security import verify_token, decrypt_password
 from app.schemas.auth import User, TokenData
 
 # HTTP Bearer token scheme
@@ -49,6 +49,19 @@ async def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+    # Decrypt password from token payload
+    encrypted_password = payload.get("encrypted_password")
+    decrypted_password = None
+    if encrypted_password:
+        try:
+            decrypted_password = decrypt_password(encrypted_password)
+        except Exception as e:
+            # If password decryption fails, log but don't fail authentication
+            # This allows for graceful degradation if encryption key changes
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Failed to decrypt password for user {username}: {e}")
+
     # Reconstruct user from token payload
     user = User(
         username=username,
@@ -56,7 +69,8 @@ async def get_current_user(
         email=payload.get("email"),
         domain=payload.get("domain", ""),
         groups=payload.get("groups", []),
-        is_admin=payload.get("is_admin", False)
+        is_admin=payload.get("is_admin", False),
+        password=decrypted_password  # Decrypted password for AD operations
     )
 
     return user

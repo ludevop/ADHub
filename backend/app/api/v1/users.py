@@ -154,7 +154,7 @@ async def update_user(
             display_name=user_data.display_name,
             email=user_data.email,
             description=user_data.description,
-            admin_password=user_data.admin_password
+            password=current_user.password
         )
 
         # Get updated user details

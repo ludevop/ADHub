@@ -58,21 +58,77 @@ class SambaDNSService:
             })
         return zones
 
-    def list_records(self, zone: str) -> List[Dict[str, Any]]:
+    def list_records(self, zone: str, password: Optional[str] = None) -> List[Dict[str, Any]]:
         """
         List all DNS records in a zone
 
         Args:
             zone: Zone name
+            password: User's password for authentication (optional)
 
         Returns:
             List of record dictionaries
         """
-        # DNS record listing without authentication is not supported in current implementation
-        # Records added through the UI will be tracked, but existing records won't be displayed
-        # This is a limitation of samba-tool dns which requires authentication for queries
-        logger.info(f"Listing DNS records for zone {zone} (read-only mode)")
-        return []
+        # If no password provided, return empty list
+        if not password:
+            logger.info(f"Listing DNS records for zone {zone} (no authentication)")
+            return []
+
+        try:
+            # Query all records in the zone using samba-tool dns query
+            result = subprocess.run(
+                ["samba-tool", "dns", "query", self._server, zone, "@", "ALL", "-U", f"Administrator%{password}"],
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+
+            if result.returncode != 0:
+                logger.warning(f"Failed to query DNS records for {zone}: {result.stderr}")
+                return []
+
+            # Parse the output to extract DNS records
+            records = []
+            current_name = None
+
+            for line in result.stdout.split('\n'):
+                line = line.strip()
+                if not line or line.startswith('Name='):
+                    continue
+
+                # Parse record lines (format: "  A: 192.168.1.1 (flags=f0, serial=110, ttl=900)")
+                if ':' in line:
+                    parts = line.split(':', 1)
+                    if len(parts) == 2:
+                        record_type = parts[0].strip()
+                        data_part = parts[1].strip()
+
+                        # Extract just the data (before the parentheses)
+                        if '(' in data_part:
+                            data = data_part.split('(')[0].strip()
+                        else:
+                            data = data_part
+
+                        # Extract the name from the full record (if available)
+                        # For zone apex records, use "@"
+                        name = "@"
+
+                        records.append({
+                            "zone": zone,
+                            "name": name,
+                            "type": record_type,
+                            "data": data
+                        })
+
+            logger.info(f"Found {len(records)} DNS records in zone {zone}")
+            return records
+
+        except subprocess.TimeoutExpired:
+            logger.error(f"Timeout while querying DNS records for zone {zone}")
+            return []
+        except Exception as e:
+            logger.error(f"Error querying DNS records for zone {zone}: {e}")
+            return []
 
     def add_record(
         self,
@@ -80,7 +136,7 @@ class SambaDNSService:
         name: str,
         record_type: str,
         data: str,
-        admin_password: str
+        password: str
     ) -> bool:
         """
         Add a DNS record
@@ -90,14 +146,14 @@ class SambaDNSService:
             name: Record name
             record_type: Record type (A, AAAA, CNAME, MX, TXT, SRV, PTR)
             data: Record data
-            admin_password: Administrator password
+            password: User's password for authentication
 
         Returns:
             True if successful
         """
         try:
             result = subprocess.run(
-                ["samba-tool", "dns", "add", self._server, zone, name, record_type, data, "-U", f"Administrator%{admin_password}"],
+                ["samba-tool", "dns", "add", self._server, zone, name, record_type, data, "-U", f"Administrator%{password}"],
                 capture_output=True,
                 text=True,
                 timeout=30
@@ -124,7 +180,7 @@ class SambaDNSService:
         name: str,
         record_type: str,
         data: str,
-        admin_password: str
+        password: str
     ) -> bool:
         """
         Delete a DNS record
@@ -134,14 +190,14 @@ class SambaDNSService:
             name: Record name
             record_type: Record type
             data: Record data
-            admin_password: Administrator password
+            password: User's password for authentication
 
         Returns:
             True if successful
         """
         try:
             result = subprocess.run(
-                ["samba-tool", "dns", "delete", self._server, zone, name, record_type, data, "-U", f"Administrator%{admin_password}"],
+                ["samba-tool", "dns", "delete", self._server, zone, name, record_type, data, "-U", f"Administrator%{password}"],
                 capture_output=True,
                 text=True,
                 timeout=30

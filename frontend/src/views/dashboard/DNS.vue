@@ -19,11 +19,8 @@ const newRecord = ref<DNSRecordCreate>({
   zone: '',
   name: '',
   type: 'A',
-  data: '',
-  admin_password: ''
+  data: ''
 })
-
-const deleteAdminPassword = ref('')
 
 // Form errors
 const addError = ref('')
@@ -81,16 +78,15 @@ function openAddRecordModal() {
     zone: selectedZone.value,
     name: '',
     type: 'A',
-    data: '',
-    admin_password: ''
+    data: ''
   }
   addError.value = ''
   showAddRecordModal.value = true
 }
 
 async function addRecord() {
-  if (!newRecord.value.name || !newRecord.value.data || !newRecord.value.admin_password) {
-    addError.value = 'Name, data, and administrator password are required'
+  if (!newRecord.value.name || !newRecord.value.data) {
+    addError.value = 'Name and data are required'
     return
   }
 
@@ -109,14 +105,13 @@ async function addRecord() {
 
 function openDeleteModal(record: DNSRecord) {
   selectedRecord.value = record
-  deleteAdminPassword.value = ''
   deleteError.value = ''
   showDeleteModal.value = true
 }
 
 async function deleteRecord() {
-  if (!selectedRecord.value || !deleteAdminPassword.value) {
-    deleteError.value = 'Administrator password is required'
+  if (!selectedRecord.value) {
+    deleteError.value = 'No record selected'
     return
   }
 
@@ -125,12 +120,10 @@ async function deleteRecord() {
       zone: selectedRecord.value.zone,
       name: selectedRecord.value.name,
       type: selectedRecord.value.type,
-      data: selectedRecord.value.data,
-      admin_password: deleteAdminPassword.value
+      data: selectedRecord.value.data
     })
     showDeleteModal.value = false
     selectedRecord.value = null
-    deleteAdminPassword.value = ''
     await loadRecords()
   } catch (e: any) {
     deleteError.value = e.response?.data?.detail || 'Failed to delete DNS record'
@@ -190,14 +183,8 @@ onMounted(() => {
 
       <div v-else-if="records.length === 0" class="empty-state">
         <div class="empty-icon">📝</div>
-        <h3>DNS Records</h3>
-        <div class="info-notice">
-          <span class="info-icon">ℹ️</span>
-          <div>
-            <p><strong>Note:</strong> Existing DNS records cannot be displayed due to authentication requirements.</p>
-            <p>You can add new DNS records, and they will be created successfully in Active Directory.</p>
-          </div>
-        </div>
+        <h3>No DNS Records</h3>
+        <p>No DNS records found in this zone.</p>
         <button class="btn btn-primary" @click="openAddRecordModal">Add DNS Record</button>
       </div>
 
@@ -307,23 +294,6 @@ onMounted(() => {
               />
             </div>
 
-            <div class="security-notice">
-              <span class="security-icon">🔒</span>
-              <span>Enter your administrator password to authorize this change</span>
-            </div>
-
-            <div class="form-group">
-              <label for="admin_password">Your Administrator Password *</label>
-              <input
-                id="admin_password"
-                v-model="newRecord.admin_password"
-                type="password"
-                required
-                :disabled="addLoading"
-                placeholder="Required to add record"
-              />
-            </div>
-
             <div class="modal-actions">
               <button type="button" class="btn btn-secondary" @click="showAddRecordModal = false" :disabled="addLoading">
                 Cancel
@@ -358,17 +328,6 @@ onMounted(() => {
           <div v-if="deleteError" class="error-alert">
             <span class="error-icon">⚠️</span>
             <span>{{ deleteError }}</span>
-          </div>
-
-          <div class="form-group">
-            <label for="delete_admin_password">Administrator Password *</label>
-            <input
-              id="delete_admin_password"
-              v-model="deleteAdminPassword"
-              type="password"
-              required
-              placeholder="Required to delete record"
-            />
           </div>
 
           <div class="modal-actions">

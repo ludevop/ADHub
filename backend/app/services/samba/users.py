@@ -288,7 +288,7 @@ class SambaUserService:
         display_name: Optional[str] = None,
         email: Optional[str] = None,
         description: Optional[str] = None,
-        admin_password: str = None
+        password: str = None
     ) -> bool:
         """
         Update user attributes using LDAP
@@ -298,7 +298,7 @@ class SambaUserService:
             display_name: New display name
             email: New email address
             description: New description
-            admin_password: Administrator password for authentication
+            password: User's password for authentication
 
         Returns:
             True if successful
@@ -341,8 +341,8 @@ class SambaUserService:
             # Connect to LDAP with Administrator credentials
             server = Server('ldap://localhost')
 
-            if not admin_password:
-                raise Exception("Admin password is required to update user attributes")
+            if not password:
+                raise Exception("Password is required to update user attributes")
 
             # Bind as Administrator with provided credentials
             admin_user = f"{netbios_domain}\\Administrator" if netbios_domain else "Administrator"
@@ -352,7 +352,7 @@ class SambaUserService:
                 conn = Connection(
                     server,
                     user=admin_user,
-                    password=admin_password,
+                    password=password,
                     authentication=SIMPLE,
                     auto_bind=True,
                     raise_exceptions=True

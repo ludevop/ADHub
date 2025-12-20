@@ -10,7 +10,7 @@ import logging
 
 from app.schemas.auth import LoginRequest, Token, User, SetupCompletionStatus
 from app.services.auth.ldap_auth import LDAPAuthService
-from app.core.security import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, ACCESS_TOKEN_EXPIRE_MINUTES_REMEMBER
+from app.core.security import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, ACCESS_TOKEN_EXPIRE_MINUTES_REMEMBER, encrypt_password
 from app.api.dependencies.auth import get_current_user, get_optional_user
 from app.services.samba.provision import SambaProvisionService
 
@@ -54,6 +54,9 @@ async def login(login_request: LoginRequest):
 
     logger.info(f"User {user.username} authenticated successfully")
 
+    # Encrypt password for storage in JWT (for AD operations)
+    encrypted_pwd = encrypt_password(login_request.password)
+
     # Create JWT token
     expires_delta = timedelta(
         minutes=ACCESS_TOKEN_EXPIRE_MINUTES_REMEMBER if login_request.remember_me
@@ -66,7 +69,8 @@ async def login(login_request: LoginRequest):
         "email": user.email,
         "domain": user.domain,
         "groups": user.groups,
-        "is_admin": user.is_admin
+        "is_admin": user.is_admin,
+        "encrypted_password": encrypted_pwd  # Store encrypted password in JWT
     }
 
     access_token = create_access_token(data=token_data, expires_delta=expires_delta)

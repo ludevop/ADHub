@@ -40,7 +40,6 @@ export interface UserUpdate {
   display_name?: string | null
   email?: string | null
   description?: string | null
-  admin_password: string
 }
 
 export interface UserPasswordChange {

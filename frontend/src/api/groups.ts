@@ -31,7 +31,6 @@ export interface GroupCreate {
 
 export interface GroupUpdate {
   description?: string | null
-  admin_password: string
 }
 
 export interface GroupMemberOperation {

@@ -24,7 +24,6 @@ class DNSRecordCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     type: str = Field(..., min_length=1, max_length=10)
     data: str = Field(..., min_length=1, max_length=255)
-    admin_password: str = Field(..., min_length=1)
 
     @field_validator('type')
     @classmethod
@@ -50,7 +49,6 @@ class DNSRecordDelete(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     type: str = Field(..., min_length=1, max_length=10)
     data: str = Field(..., min_length=1, max_length=255)
-    admin_password: str = Field(..., min_length=1)
 
     @field_validator('type')
     @classmethod

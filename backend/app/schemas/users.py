@@ -40,7 +40,6 @@ class UserUpdate(BaseModel):
     display_name: Optional[str] = Field(None, max_length=64)
     email: Optional[str] = Field(None, max_length=255)
     description: Optional[str] = Field(None, max_length=255)
-    admin_password: str = Field(..., min_length=1)
 
 
 class UserPasswordChange(BaseModel):

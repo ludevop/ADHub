@@ -22,10 +22,8 @@ const newGroup = ref<GroupCreate>({
 
 // Edit group form
 const editGroup = ref<GroupUpdate>({
-  description: '',
-  admin_password: ''
+  description: ''
 })
-const editAdminPassword = ref('')
 
 // Add member form
 const newMemberUsername = ref('')
@@ -83,10 +81,8 @@ async function createGroup() {
 function openEditModal(group: Group) {
   selectedGroup.value = group
   editGroup.value = {
-    description: group.description || '',
-    admin_password: ''
+    description: group.description || ''
   }
-  editAdminPassword.value = ''
   editError.value = ''
   showEditModal.value = true
 }
@@ -94,21 +90,14 @@ function openEditModal(group: Group) {
 async function updateGroup() {
   if (!selectedGroup.value) return
 
-  if (!editAdminPassword.value) {
-    editError.value = 'Administrator password is required to save changes'
-    return
-  }
-
   try {
     editLoading.value = true
     editError.value = ''
     await groupsApi.updateGroup(selectedGroup.value.name, {
-      description: editGroup.value.description,
-      admin_password: editAdminPassword.value
+      description: editGroup.value.description
     })
     showEditModal.value = false
     selectedGroup.value = null
-    editAdminPassword.value = ''
     await loadGroups()
   } catch (e: any) {
     editError.value = e.response?.data?.detail || 'Failed to update group'
@@ -332,23 +321,6 @@ onMounted(() => {
                 type="text"
                 :disabled="editLoading"
                 placeholder="Group description"
-              />
-            </div>
-
-            <div class="security-notice">
-              <span class="security-icon">🔒</span>
-              <span>Enter your administrator password to authorize these changes</span>
-            </div>
-
-            <div class="form-group">
-              <label for="edit_admin_password">Your Administrator Password *</label>
-              <input
-                id="edit_admin_password"
-                v-model="editAdminPassword"
-                type="password"
-                required
-                :disabled="editLoading"
-                placeholder="Required to save changes"
               />
             </div>
 

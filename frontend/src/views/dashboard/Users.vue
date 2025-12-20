@@ -28,10 +28,8 @@ const newUser = ref<UserCreate>({
 const editUser = ref<UserUpdate>({
   display_name: '',
   email: '',
-  description: '',
-  admin_password: ''
+  description: ''
 })
-const editAdminPassword = ref('')
 
 // Password form
 const newPassword = ref('')
@@ -95,10 +93,8 @@ function openEditModal(user: User) {
   editUser.value = {
     display_name: user.display_name || '',
     email: user.email || '',
-    description: user.description || '',
-    admin_password: ''
+    description: user.description || ''
   }
-  editAdminPassword.value = ''
   editError.value = ''
   showEditModal.value = true
 }
@@ -106,23 +102,16 @@ function openEditModal(user: User) {
 async function updateUser() {
   if (!selectedUser.value) return
 
-  if (!editAdminPassword.value) {
-    editError.value = 'Administrator password is required to save changes'
-    return
-  }
-
   try {
     editLoading.value = true
     editError.value = ''
     await usersApi.updateUser(selectedUser.value.username, {
       display_name: editUser.value.display_name,
       email: editUser.value.email,
-      description: editUser.value.description,
-      admin_password: editAdminPassword.value
+      description: editUser.value.description
     })
     showEditModal.value = false
     selectedUser.value = null
-    editAdminPassword.value = '' // Clear password
     await loadUsers()
   } catch (e: any) {
     editError.value = e.response?.data?.detail || 'Failed to update user'
@@ -429,23 +418,6 @@ onMounted(() => {
                 type="text"
                 :disabled="editLoading"
                 placeholder="User description"
-              />
-            </div>
-
-            <div class="security-notice">
-              <span class="security-icon">🔒</span>
-              <span>Enter your administrator password to authorize these changes</span>
-            </div>
-
-            <div class="form-group">
-              <label for="edit_admin_password">Your Administrator Password *</label>
-              <input
-                id="edit_admin_password"
-                v-model="editAdminPassword"
-                type="password"
-                required
-                :disabled="editLoading"
-                placeholder="Required to save changes"
               />
             </div>
 

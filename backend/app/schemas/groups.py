@@ -32,7 +32,6 @@ class GroupCreate(BaseModel):
 class GroupUpdate(BaseModel):
     """Schema for updating a group"""
     description: Optional[str] = Field(None, max_length=255)
-    admin_password: str = Field(..., min_length=1)
 
 
 class GroupMemberOperation(BaseModel):

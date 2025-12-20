@@ -35,7 +35,6 @@ export interface DNSRecordCreate {
   name: string
   type: string
   data: string
-  admin_password: string
 }
 
 export interface DNSRecordDelete {
@@ -43,7 +42,6 @@ export interface DNSRecordDelete {
   name: string
   type: string
   data: string
-  admin_password: string
 }
 
 export interface DNSZoneListResponse {

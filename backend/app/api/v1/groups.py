@@ -140,7 +140,7 @@ async def update_group(
         group_service.update_group(
             groupname=groupname,
             description=group_data.description,
-            admin_password=group_data.admin_password
+            password=current_user.password
         )
 
         # Get updated group details
